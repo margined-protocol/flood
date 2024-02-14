@@ -1,0 +1,57 @@
+# The address prefix used for cosmos based addresses
+address_prefix = "osmo"
+
+# Fees to be sent with the transaction
+fees = "10000uosmo"
+
+# Gas Limit. "auto" attempts to do this automatically
+# gas = "auto"
+gas = "250000"
+
+# The multiplier on gas estimates
+gas_adjustment = 1.3
+
+# GRPC Server Address
+# grpc_server_address = "osmosis-testnet-grpc.polkachu.com:12590"
+grpc_server_address = "osmosis-grpc.polkachu.com:12590"
+
+# The memo to be sent with the transaction
+memo = "flood"
+
+# The power addresses to check
+power_addresses = [
+ # Testnet
+ # "osmo1cnj84q49sp4sd3tsacdw9p4zvyd8y46f2248ndq2edve3fqa8krs9jds9g",
+ # Mainnet
+ "osmo1rk4hregdr63rlqqj0k2rjzk6kz7w6v6tw8f5fqx2wg8203eam5equ67tdl",
+ "osmo1zttzenjrnfr8tgrsfyu8kw0eshd8mas7yky43jjtactkhvmtkg2qz769y2",
+]
+
+# RPC Server Address
+# rpc_server_address = "https://osmosis-testnet-rpc.polkachu.com:443"
+# rpc_server_address = "https://osmosis-rpc.polkachu.com:443"
+# rpc_server_address = "https://rpc-testnet.margined.io:443"
+websocket_path = "/websocket"
+# rpc_server_address = "https://osmosis-testnet-api.polkachu.com:443"
+rpc_server_address = "https://rpc.margined.io:443"
+
+# The signer account
+# signer_account = "margined-liquidator"
+signer_account = "deployer"
+
+[key]
+app_name = "osmosis"
+backend  = "pass"
+root_dir = "/Users/wandlitz"
+
+[base_pool]
+base_asset   = "atom"
+pool_id      = 1078
+quote_asset  = "ibc/4ABBEF4C8926DDDB320AE5188CFD63267ABBCEFC0583E4AE05D6E5AA2401DDAB"
+target_price = "12.00994524"
+
+[power_pool]
+base_asset   = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+pool_id      = 1299
+quote_asset  = "factory/osmo1g8qypve6l95xmhgc0fddaecerffymsl7kn9muw/sqatom"
+target_price = "12.00994524"

@@ -1,0 +1,14 @@
+[Unit]
+Description=Flood - CL Pool Liquidity Provider Bot
+After=network.target
+
+[Service]
+Type=oneshot
+User=margined
+WorkingDirectory=/home/margined
+ExecStart=/usr/local/bin/powerbalance -c /home/margined/.config/powerbalance/config.toml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
