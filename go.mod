@@ -5,6 +5,7 @@ go 1.21.4
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/CosmWasm/wasmd v0.45.1-0.20231128163306-4b9b61faeaa3
+	github.com/cosmos/cosmos-sdk v0.47.5
 	github.com/ignite/cli v0.27.2
 	github.com/osmosis-labs/osmosis/osmomath v0.0.7-0.20231124190325-d75e9ade352e
 	github.com/osmosis-labs/osmosis/v21 v21.0.0-rc3
@@ -57,7 +58,6 @@ require (
 	github.com/confio/ics23/go v0.9.1 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3 // indirect
-	github.com/cosmos/cosmos-sdk v0.47.5 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
 	github.com/cosmos/gogoproto v1.4.11 // indirect

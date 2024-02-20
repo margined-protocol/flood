@@ -36,22 +36,22 @@ websocket_path = "/websocket"
 rpc_server_address = "https://rpc.margined.io:443"
 
 # The signer account
-# signer_account = "margined-liquidator"
+# signer_account = "liquidity-provider"
 signer_account = "deployer"
 
 [key]
 app_name = "osmosis"
 backend  = "pass"
+# backend  = "os"
 root_dir = "/Users/wandlitz"
-
-[base_pool]
-base_asset   = "atom"
-pool_id      = 1078
-quote_asset  = "ibc/4ABBEF4C8926DDDB320AE5188CFD63267ABBCEFC0583E4AE05D6E5AA2401DDAB"
-target_price = "12.00994524"
 
 [power_pool]
 base_asset   = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
 pool_id      = 1299
 quote_asset  = "factory/osmo1g8qypve6l95xmhgc0fddaecerffymsl7kn9muw/sqatom"
 target_price = "12.00994524"
+
+[position]
+default_token_0_amount = 3834048982
+default_token_1_amount = 350000000
+spread                 = "0.05"     # 5%

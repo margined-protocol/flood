@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"go.uber.org/zap"
 
@@ -15,6 +16,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/margined-protocol/flood/internal/config"
+	"github.com/margined-protocol/flood/internal/liquidity"
 	"github.com/margined-protocol/flood/internal/logger"
 	"github.com/margined-protocol/flood/internal/maths"
 	"github.com/margined-protocol/flood/internal/power"
@@ -103,10 +105,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Println("Version:", Version)
-	fmt.Println("configPath:", configPath)
-	fmt.Println("showVersion:", showVersion)
-
 	ctx := context.Background()
 
 	// Intialise logger, config, comsosclient and grpc client
@@ -152,7 +150,6 @@ func main() {
 		l.Fatal("Failed to fetch spot prices", zap.Error(err))
 	}
 
-	fmt.Println("baseSpotPrice:", powerConfig)
 	// Calculate the mark price
 	markPrice, err := maths.CalculateMarkPrice(baseSpotPrice, powerSpotPrice, powerState.NormalisationFactor, powerConfig.IndexScale)
 	if err != nil {
@@ -174,12 +171,23 @@ func main() {
 	// Calculate the premium
 	premium := maths.CalculatePremium(markPrice, indexPrice)
 
+	// get inverse target and spot prices
+	floatPowerSpotPrice, err := strconv.ParseFloat(powerSpotPrice, 64)
+	if err != nil {
+		l.Fatal("Failed to parse power spot price", zap.Error(err))
+	}
+
+	inverseTargetPrice := 1 / targetPrice
+	inversePowerPrice := 1 / floatPowerSpotPrice
+
 	// Sanity check computations
 	l.Debug("Summary data",
 		zap.String("base_spot_price", baseSpotPrice),
 		zap.Float64("mark_price", markPrice),
 		zap.Float64("target_price", targetPrice),
+		zap.Float64("inverse_target_price", inverseTargetPrice),
 		zap.String("power_price", powerSpotPrice),
+		zap.Float64("inverse_power_price", inversePowerPrice),
 		zap.Float64("index_price", indexPrice),
 		zap.Float64("premium", premium),
 		zap.String("normalization_factor", powerState.NormalisationFactor),
@@ -190,20 +198,32 @@ func main() {
 		PoolId:  powerConfig.PowerPool.ID,
 		Address: address,
 	}
-	l.Debug("request -> ",
+	l.Debug("Request:",
 		zap.Reflect("request", req),
 	)
+
 	userPositions, err := clClient.UserPositions(ctx, &req)
 	if err != nil {
 		l.Fatal("Failed to find user positions", zap.Error(err))
 	}
-	l.Debug("liquidity in net direction -> ",
-		zap.Reflect("response", userPositions),
-	)
 
-	if userPositions.Positions == nil {
-		l.Info("No positions found")
+	powerPriceStr := fmt.Sprintf("%f", inversePowerPrice)
+	targetPriceStr := fmt.Sprintf("%f", inverseTargetPrice)
 
+	msgs, err := liquidity.CreateUpdatePositionMsgs(l, *userPositions, cfg, address, powerPriceStr, targetPriceStr)
+	if err != nil {
+		l.Fatal("Failed to create update position msgs", zap.Error(err))
+	}
+
+	txResp, err := client.BroadcastTx(ctx, account, msgs...)
+	if err != nil {
+		l.Error("Transaction error",
+			zap.Error(err),
+		)
+	} else {
+		l.Debug("tx response",
+			zap.String("transaction hash", txResp.TxHash),
+		)
 	}
 
 }

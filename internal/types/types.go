@@ -18,6 +18,13 @@ type PowerPool struct {
 	TargetPrice string `toml:"target_price"`
 }
 
+type Position struct {
+	DefaultToken0Amount int64  `toml:"default_token_0_amount"`
+	DefaultToken1Amount int64  `toml:"default_token_1_amount"`
+	Spread              string `toml:"spread"`
+	LpSpread            string `toml:"lp_spread"`
+}
+
 type Config struct {
 	AddressPrefix     string     `toml:"address_prefix"`
 	Fees              string     `toml:"fees"`
@@ -26,11 +33,11 @@ type Config struct {
 	GRPCServerAddress string     `toml:"grpc_server_address"`
 	Key               SigningKey `toml:"key"`
 	Memo              string     `toml:"memo"`
-	PowerAddresses    []string   `toml:"power_addresses"`
 	PowerPool         PowerPool  `toml:"power_pool"`
 	RPCServerAddress  string     `toml:"rpc_server_address"`
 	WebsocketPath     string     `toml:"websocket_path"`
 	SignerAccount     string     `toml:"signer_account"`
+	Position          Position   `toml:"position"`
 }
 
 // getVaultResponse represents the response structure for querying information about a vault.
