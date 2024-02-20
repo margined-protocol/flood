@@ -25,8 +25,11 @@ import (
 
 	"github.com/ignite/cli/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/ignite/pkg/cosmosclient"
+	"github.com/osmosis-labs/osmosis/v21/tests/e2e/util"
 	clquery "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
+	cltypes "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/types"
 	pmquery "github.com/osmosis-labs/osmosis/v21/x/poolmanager/client/queryproto"
+	pmtypes "github.com/osmosis-labs/osmosis/v21/x/poolmanager/types"
 )
 
 var (
@@ -133,7 +136,7 @@ func main() {
 	c := wasmtypes.NewQueryClient(client.Context())
 
 	// Initialise a poolmanager query client
-	poolmanagerClient := pmquery.NewQueryClient(client.Context())
+	pmClient := pmquery.NewQueryClient(client.Context())
 
 	// Initialise a concentrated liquidity query client
 	clClient := clquery.NewQueryClient(client.Context())
@@ -145,7 +148,7 @@ func main() {
 	}
 
 	// Get the spotprices for base and power
-	baseSpotPrice, powerSpotPrice, err := queries.GetSpotPrices(ctx, poolmanagerClient, powerConfig)
+	baseSpotPrice, powerSpotPrice, err := queries.GetSpotPrices(ctx, pmClient, powerConfig)
 	if err != nil {
 		l.Fatal("Failed to fetch spot prices", zap.Error(err))
 	}
@@ -207,10 +210,24 @@ func main() {
 		l.Fatal("Failed to find user positions", zap.Error(err))
 	}
 
+	poolReq := pmquery.PoolRequest{PoolId: powerConfig.PowerPool.ID}
+	res, err := pmClient.Pool(ctx, &poolReq)
+	if err != nil {
+		l.Fatal("Failed to find pool", zap.Error(err))
+	}
+
+	var pool pmtypes.PoolI
+	err = util.Cdc.UnpackAny(res.Pool, &pool)
+	if err != nil {
+		l.Fatal("Failed to unpack", zap.Error(err))
+	}
+
+	currentTick := pool.(cltypes.ConcentratedPoolExtension).GetCurrentTick()
+
 	powerPriceStr := fmt.Sprintf("%f", inversePowerPrice)
 	targetPriceStr := fmt.Sprintf("%f", inverseTargetPrice)
 
-	msgs, err := liquidity.CreateUpdatePositionMsgs(l, *userPositions, cfg, address, powerPriceStr, targetPriceStr)
+	msgs, err := liquidity.CreateUpdatePositionMsgs(l, *userPositions, cfg, currentTick, address, powerPriceStr, targetPriceStr)
 	if err != nil {
 		l.Fatal("Failed to create update position msgs", zap.Error(err))
 	}

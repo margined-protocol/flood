@@ -1,6 +1,9 @@
 package liquidity
 
 import (
+	"fmt"
+
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/osmosis-labs/osmosis/osmomath"
 	clmath "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/math"
@@ -12,7 +15,14 @@ import (
 const TICK_SPACING = int64(100)
 
 // createPositionMsg creates a new CL position message
-func createPositionMsg(poolId uint64, lowerTick, upperTick int64, tokens sdk.Coins, addr string) sdk.Msg {
+func createPositionMsg(poolId uint64, lowerTick, upperTick int64, tokens sdk.Coins, addr string, isBuy bool) sdk.Msg {
+	var amount0, amount1 sdkmath.Int
+	if isBuy {
+		amount0, amount1 = sdk.ZeroInt(), sdk.NewInt(1)
+	} else {
+		amount0, amount1 = sdk.NewInt(1), sdk.ZeroInt()
+	}
+
 	// Generate the swap message
 	msg := cltypes.MsgCreatePosition{
 		PoolId:          poolId,
@@ -20,8 +30,8 @@ func createPositionMsg(poolId uint64, lowerTick, upperTick int64, tokens sdk.Coi
 		LowerTick:       lowerTick,
 		UpperTick:       upperTick,
 		TokensProvided:  tokens,
-		TokenMinAmount0: sdk.NewInt(1),
-		TokenMinAmount1: sdk.NewInt(1),
+		TokenMinAmount0: amount0,
+		TokenMinAmount1: amount1,
 	}
 
 	return &msg
@@ -58,7 +68,7 @@ func RemovePreviousPositions(l *zap.Logger, positions []model.FullPositionBreakd
 }
 
 // marketMake creates a market making positions
-func MarketMake(l *zap.Logger, poolId uint64, spotPrice, targetPrice, spread string, token0 sdk.Coin, token1 sdk.Coin, addr string) ([]sdk.Msg, error) {
+func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targetPrice, spread string, token0 sdk.Coin, token1 sdk.Coin, addr string) ([]sdk.Msg, error) {
 	l.Debug("inputs",
 		zap.String("spotPrice", spotPrice),
 		zap.String("targetPrice", targetPrice),
@@ -82,16 +92,52 @@ func MarketMake(l *zap.Logger, poolId uint64, spotPrice, targetPrice, spread str
 		return nil, err
 	}
 
-	buyTick, lowTick, sellTick, highTick, err := calculateBuySellTicks(l, spotPriceAsBigDec, targetPriceAsBigDec, spreadAsBigDec)
+	buyTick, lowTick, sellTick, highTick, err := calculateBuySellTicks(l, targetPriceAsBigDec, spotPriceAsBigDec, spreadAsBigDec)
 	if err != nil {
 		l.Error("Failed to calculate buy and sell ticks", zap.Error(err))
 		return nil, err
 	}
 
-	buyPosition := createPositionMsg(poolId, lowTick, buyTick, sdk.NewCoins(token0), addr)
-	sellPosition := createPositionMsg(poolId, sellTick, highTick, sdk.NewCoins(token1), addr)
+	fmt.Println("currentTick", currentTick)
+	fmt.Println("buyTick", buyTick)
+	fmt.Println("lowTick", lowTick)
+	fmt.Println("sellTick", sellTick)
+	fmt.Println("highTick", highTick)
+
+	lowTick, buyTick = adjustForCurrentTick(l, true, currentTick, lowTick, buyTick)
+	sellTick, highTick = adjustForCurrentTick(l, false, currentTick, sellTick, highTick)
+
+	fmt.Println("buyTick", buyTick)
+	fmt.Println("lowTick", lowTick)
+	fmt.Println("sellTick", sellTick)
+	fmt.Println("highTick", highTick)
+
+	buyPosition := createPositionMsg(poolId, lowTick, buyTick, sdk.NewCoins(token1), addr, true)
+	sellPosition := createPositionMsg(poolId, sellTick, highTick, sdk.NewCoins(token0), addr, false)
+
+	fmt.Println("buyPosition", buyPosition)
+	fmt.Println("sellPosition", sellPosition)
 
 	return []sdk.Msg{buyPosition, sellPosition}, nil
+}
+
+func adjustForCurrentTick(l *zap.Logger, isBuy bool, currentTick, lowerTick, upperTick int64) (int64, int64) {
+
+	fmt.Println("lowerTick", lowerTick)
+
+	if lowerTick <= currentTick && currentTick <= upperTick {
+		fmt.Println("The value is within the range.")
+
+		if isBuy {
+			upperTick = currentTick - TICK_SPACING
+		} else {
+			lowerTick = currentTick + TICK_SPACING
+		}
+	}
+
+	fmt.Println("lowerTick", lowerTick)
+
+	return lowerTick, upperTick
 }
 
 func calculateBuySellTicks(l *zap.Logger, buyPrice, sellPrice, spread osmomath.BigDec) (int64, int64, int64, int64, error) {

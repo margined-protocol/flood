@@ -8,7 +8,7 @@ import (
 	"github.com/margined-protocol/flood/internal/types"
 )
 
-func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cfg *types.Config, address, powerPrice, targetPrice string) ([]sdk.Msg, error) {
+func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cfg *types.Config, currentTick int64, address, powerPrice, targetPrice string) ([]sdk.Msg, error) {
 	var msgs []sdk.Msg
 
 	var token0 sdk.Coin
@@ -52,7 +52,7 @@ func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cf
 
 	}
 
-	positionMsgs, err := MarketMake(l, cfg.PowerPool.PoolId, powerPrice, targetPrice, cfg.Position.Spread, token0, token1, address)
+	positionMsgs, err := MarketMake(l, cfg.PowerPool.PoolId, currentTick, powerPrice, targetPrice, cfg.Position.Spread, token0, token1, address)
 	if err != nil {
 		l.Fatal("Failed to market make", zap.Error(err))
 		return nil, err
