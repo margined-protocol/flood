@@ -10,7 +10,7 @@ require (
 	github.com/ignite/cli v0.27.2
 	github.com/osmosis-labs/osmosis/osmomath v0.0.7-0.20231124190325-d75e9ade352e
 	github.com/osmosis-labs/osmosis/v21 v21.0.0-rc3
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.59.0
 	gotest.tools v2.2.0+incompatible
 )
