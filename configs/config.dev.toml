@@ -1,0 +1,41 @@
+# The address prefix used for cosmos based addresses
+address_prefix = "osmo"
+
+# Fees to be sent with the transaction
+fees = "10000uosmo"
+
+# Gas Limit. "auto" attempts to do this automatically
+gas = "250000"
+# gas = "200000"
+
+# The multiplier on gas estimates
+gas_adjustment = 3
+
+# GRPC Server Address
+grpc_server_address = "osmosis-testnet-grpc.polkachu.com:12590"
+
+# The memo to be sent with the transaction
+memo = "botbot"
+
+# The power addresses to check
+power_addresses = [
+  "osmo1cnj84q49sp4sd3tsacdw9p4zvyd8y46f2248ndq2edve3fqa8krs9jds9g",
+]
+
+# RPC Server Address
+rpc_server_address = "https://rpc-testnet.margined.io:443"
+websocket_path = "/websocket"
+
+# The signer account
+signer_account = "bot-1"
+
+[key]
+app_name = "osmosis"
+backend  = "pass"
+root_dir = "/home/go"
+
+[power_pool]
+pool_id = 63
+base_asset  = "uosmo"
+quote_asset = "uion"
+target_price = "0.003569258035311200"
