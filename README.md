@@ -66,7 +66,7 @@ pass show keyring-osmosis/bot-1.info
 
 [1]: https://github.com/margined-protocol/flood/actions/workflows/golangci-lint.yml/badge.svg
 [2]: https://github.com/margined-protocol/flood/actions/workflows/golangci-lint.yml
-[3]: assets/images/flood.webp
+[3]: assets/flood.webp
 [4]: ../../releases
 [5]: https://www.passwordstore.org/
 [6]: configs/config.example.toml
