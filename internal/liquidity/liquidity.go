@@ -98,19 +98,8 @@ func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targ
 		return nil, err
 	}
 
-	fmt.Println("currentTick", currentTick)
-	fmt.Println("buyTick", buyTick)
-	fmt.Println("lowTick", lowTick)
-	fmt.Println("sellTick", sellTick)
-	fmt.Println("highTick", highTick)
-
 	lowTick, buyTick = adjustForCurrentTick(l, true, currentTick, lowTick, buyTick)
 	sellTick, highTick = adjustForCurrentTick(l, false, currentTick, sellTick, highTick)
-
-	fmt.Println("buyTick", buyTick)
-	fmt.Println("lowTick", lowTick)
-	fmt.Println("sellTick", sellTick)
-	fmt.Println("highTick", highTick)
 
 	buyPosition := createPositionMsg(poolId, lowTick, buyTick, sdk.NewCoins(token1), addr, true)
 	sellPosition := createPositionMsg(poolId, sellTick, highTick, sdk.NewCoins(token0), addr, false)
@@ -135,7 +124,15 @@ func adjustForCurrentTick(l *zap.Logger, isBuy bool, currentTick, lowerTick, upp
 		}
 	}
 
-	fmt.Println("lowerTick", lowerTick)
+	upperTick, err := clmath.RoundDownTickToSpacing(upperTick, TICK_SPACING)
+	if err != nil {
+		l.Error("Failed to calculate buy price tick", zap.Error(err))
+	}
+
+	lowerTick, err = clmath.RoundDownTickToSpacing(lowerTick, TICK_SPACING)
+	if err != nil {
+		l.Error("Failed to calculate buy price tick", zap.Error(err))
+	}
 
 	return lowerTick, upperTick
 }

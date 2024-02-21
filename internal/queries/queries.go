@@ -5,10 +5,29 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/osmosis-labs/osmosis/v21/tests/e2e/util"
+	cl "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
+	cltypes "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/types"
 	poolmanager "github.com/osmosis-labs/osmosis/v21/x/poolmanager/client/queryproto"
+	pmtypes "github.com/osmosis-labs/osmosis/v21/x/poolmanager/types"
 
 	"github.com/margined-protocol/flood/internal/types"
 )
+
+func GetUserPositions(ctx context.Context, client cl.QueryClient, poolConfig types.Pool, user string) (*cl.UserPositionsResponse, error) {
+	// Now lets check if we have any open CL positions for the bot
+	req := cl.UserPositionsRequest{
+		PoolId:  poolConfig.ID,
+		Address: user,
+	}
+
+	userPositions, err := client.UserPositions(ctx, &req)
+	if err != nil {
+		return &cl.UserPositionsResponse{}, err
+	}
+
+	return userPositions, nil
+}
 
 func GetSpotPrice(ctx context.Context, client poolmanager.QueryClient, poolConfig types.Pool) (string, error) {
 	req := poolmanager.SpotPriceRequest{
@@ -25,6 +44,26 @@ func GetSpotPrice(ctx context.Context, client poolmanager.QueryClient, poolConfi
 	}
 
 	return spotPrice.SpotPrice, nil
+}
+
+func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolId uint64) (int64, error) {
+
+	poolReq := poolmanager.PoolRequest{PoolId: poolId}
+	res, err := client.Pool(ctx, &poolReq)
+	if err != nil {
+		return 0, err
+	}
+
+	var pool pmtypes.PoolI
+	err = util.Cdc.UnpackAny(res.Pool, &pool)
+	if err != nil {
+		return 0, err
+	}
+
+	currentTick := pool.(cltypes.ConcentratedPoolExtension).GetCurrentTick()
+
+	return currentTick, nil
+
 }
 
 func GetTotalPoolLiquidity(ctx context.Context, client poolmanager.QueryClient, poolId uint64) (*poolmanager.TotalPoolLiquidityResponse, error) {

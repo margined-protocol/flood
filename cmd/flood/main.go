@@ -25,11 +25,8 @@ import (
 
 	"github.com/ignite/cli/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/ignite/pkg/cosmosclient"
-	"github.com/osmosis-labs/osmosis/v21/tests/e2e/util"
 	clquery "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
-	cltypes "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/types"
 	pmquery "github.com/osmosis-labs/osmosis/v21/x/poolmanager/client/queryproto"
-	pmtypes "github.com/osmosis-labs/osmosis/v21/x/poolmanager/types"
 )
 
 var (
@@ -114,8 +111,6 @@ func main() {
 	l, cfg, client, conn := initialize(ctx, *configPath)
 	defer conn.Close()
 
-	fmt.Println(client.AccountRegistry.List())
-
 	// Get the client account
 	account, err := client.Account(cfg.SignerAccount)
 	if err != nil {
@@ -185,44 +180,25 @@ func main() {
 
 	// Sanity check computations
 	l.Debug("Summary data",
-		zap.String("base_spot_price", baseSpotPrice),
 		zap.Float64("mark_price", markPrice),
 		zap.Float64("target_price", targetPrice),
 		zap.Float64("inverse_target_price", inverseTargetPrice),
 		zap.String("power_price", powerSpotPrice),
 		zap.Float64("inverse_power_price", inversePowerPrice),
-		zap.Float64("index_price", indexPrice),
 		zap.Float64("premium", premium),
 		zap.String("normalization_factor", powerState.NormalisationFactor),
 	)
 
 	// Now lets check if we have any open CL positions for the bot
-	req := clquery.UserPositionsRequest{
-		PoolId:  powerConfig.PowerPool.ID,
-		Address: address,
-	}
-	l.Debug("Request:",
-		zap.Reflect("request", req),
-	)
-
-	userPositions, err := clClient.UserPositions(ctx, &req)
+	userPositions, err := queries.GetUserPositions(ctx, clClient, powerConfig.PowerPool, address)
 	if err != nil {
 		l.Fatal("Failed to find user positions", zap.Error(err))
 	}
 
-	poolReq := pmquery.PoolRequest{PoolId: powerConfig.PowerPool.ID}
-	res, err := pmClient.Pool(ctx, &poolReq)
+	currentTick, err := queries.GetCurrentTick(ctx, pmClient, powerConfig.PowerPool.ID)
 	if err != nil {
-		l.Fatal("Failed to find pool", zap.Error(err))
+		l.Fatal("Failed to get current tick", zap.Error(err))
 	}
-
-	var pool pmtypes.PoolI
-	err = util.Cdc.UnpackAny(res.Pool, &pool)
-	if err != nil {
-		l.Fatal("Failed to unpack", zap.Error(err))
-	}
-
-	currentTick := pool.(cltypes.ConcentratedPoolExtension).GetCurrentTick()
 
 	powerPriceStr := fmt.Sprintf("%f", inversePowerPrice)
 	targetPriceStr := fmt.Sprintf("%f", inverseTargetPrice)
