@@ -29,7 +29,7 @@ An example config file with comments is provided at
 
 ### Usage
 
-To run power balance pass the path of the configuration to the `-c` flag.
+To run flood pass the path of the configuration to the `-c` flag.
 
 ```sh
 LOG_LEVEL=debug ./bin/flood -c configs/config.example.toml
@@ -37,7 +37,7 @@ LOG_LEVEL=debug ./bin/flood -c configs/config.example.toml
 
 ### Managing keys
 
-Power Balance can be configured to use [`pass`][5] as a keychain.
+Flood can be configured to use [`pass`][5] as a keychain.
 
 ```toml
 signer_account = "bot-1"
@@ -56,6 +56,12 @@ running
 pass show keyring-osmosis/bot-1.info
 ```
 
+#### Adding a Key to Pass
+
+```sh
+osmsosisd keys add [name-of-your-key] --keyring-backend pass
+```
+
 <!-- dprint-ignore-start -->
 
 > [!TIP]
@@ -66,7 +72,7 @@ pass show keyring-osmosis/bot-1.info
 
 [1]: https://github.com/margined-protocol/flood/actions/workflows/golangci-lint.yml/badge.svg
 [2]: https://github.com/margined-protocol/flood/actions/workflows/golangci-lint.yml
-[3]: assets/flood.webp
+[3]: assetstele/flood.webp
 [4]: ../../releases
 [5]: https://www.passwordstore.org/
 [6]: configs/config.example.toml

@@ -10,10 +10,6 @@ import (
 	"github.com/margined-protocol/flood/internal/types"
 )
 
-var contractAddress = "osmo1zttzenjrnfr8tgrsfyu8kw0eshd8mas7yky43jjtactkhvmtkg2qz769y2"
-
-// var contractAddress = "osmo1cnj84q49sp4sd3tsacdw9p4zvyd8y46f2248ndq2edve3fqa8krs9jds9g"
-
 // querySmartContract executes a generic query to a smart contract.
 func querySmartContract(ctx context.Context, pa string, c wasmtypes.QueryClient, query string, out interface{}) error {
 	req := &wasmtypes.QuerySmartContractStateRequest{
@@ -43,7 +39,7 @@ func getConfig(ctx context.Context, pa string, c wasmtypes.QueryClient) (types.G
 	return getConfigData, err
 }
 
-func GetConfigAndState(ctx context.Context, wasmClient wasmtypes.QueryClient) (types.GetConfigResponse, types.GetStateResponse, error) {
+func GetConfigAndState(ctx context.Context, wasmClient wasmtypes.QueryClient, contractAddress string) (types.GetConfigResponse, types.GetStateResponse, error) {
 	var config types.GetConfigResponse
 	var state types.GetStateResponse
 	var err error

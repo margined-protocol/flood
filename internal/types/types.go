@@ -12,9 +12,10 @@ type Asset struct {
 }
 
 type PowerPool struct {
-	PoolId     uint64 `toml:"pool_id"`
-	BaseAsset  string `toml:"base_asset"`
-	QuoteAsset string `toml:"quote_asset"`
+	PoolId          uint64 `toml:"pool_id"`
+	BaseAsset       string `toml:"base_asset"`
+	QuoteAsset      string `toml:"quote_asset"`
+	ContractAddress string `toml:"contract_address"`
 }
 
 type Position struct {

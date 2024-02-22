@@ -25,6 +25,23 @@ func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cf
 
 	}
 
+	if len(p.Positions) == 1 {
+		l.Info("Found open positions")
+
+		l.Debug("existing positions",
+			zap.Reflect("Positions", p.Positions),
+		)
+
+		removeMsgs := RemovePreviousPositions(l, p.Positions)
+		msgs = append(msgs, removeMsgs...)
+
+		l.Debug("removing positions",
+			zap.Reflect("removeMsgs", removeMsgs),
+		)
+
+		return msgs, nil
+	}
+
 	if len(p.Positions) == 2 {
 		l.Info("Found open positions")
 
@@ -49,7 +66,6 @@ func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cf
 			zap.Int64("token0", token0.Amount.Int64()),
 			zap.Int64("token1", token1.Amount.Int64()),
 		)
-
 	}
 
 	positionMsgs, err := MarketMake(l, cfg.PowerPool.PoolId, currentTick, powerPrice, targetPrice, cfg.Position.Spread, token0, token1, address)

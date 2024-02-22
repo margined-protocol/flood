@@ -137,7 +137,7 @@ func main() {
 	clClient := clquery.NewQueryClient(client.Context())
 
 	// Get the power config and state
-	powerConfig, powerState, err := power.GetConfigAndState(ctx, c)
+	powerConfig, powerState, err := power.GetConfigAndState(ctx, c, cfg.PowerPool.ContractAddress)
 	if err != nil {
 		log.Fatalf("Failed to get config and state: %v", err)
 	}
@@ -178,17 +178,6 @@ func main() {
 	inverseTargetPrice := 1 / targetPrice
 	inversePowerPrice := 1 / floatPowerSpotPrice
 
-	// Sanity check computations
-	l.Debug("Summary data",
-		zap.Float64("mark_price", markPrice),
-		zap.Float64("target_price", targetPrice),
-		zap.Float64("inverse_target_price", inverseTargetPrice),
-		zap.String("power_price", powerSpotPrice),
-		zap.Float64("inverse_power_price", inversePowerPrice),
-		zap.Float64("premium", premium),
-		zap.String("normalization_factor", powerState.NormalisationFactor),
-	)
-
 	// Now lets check if we have any open CL positions for the bot
 	userPositions, err := queries.GetUserPositions(ctx, clClient, powerConfig.PowerPool, address)
 	if err != nil {
@@ -199,6 +188,18 @@ func main() {
 	if err != nil {
 		l.Fatal("Failed to get current tick", zap.Error(err))
 	}
+
+	// Sanity check computations
+	l.Debug("Summary data",
+		zap.Float64("mark_price", markPrice),
+		zap.Float64("target_price", targetPrice),
+		zap.Float64("inverse_target_price", inverseTargetPrice),
+		zap.String("power_price", powerSpotPrice),
+		zap.Float64("inverse_power_price", inversePowerPrice),
+		zap.Float64("premium", premium),
+		zap.String("normalization_factor", powerState.NormalisationFactor),
+		zap.Int64("current_tick", currentTick),
+	)
 
 	powerPriceStr := fmt.Sprintf("%f", inversePowerPrice)
 	targetPriceStr := fmt.Sprintf("%f", inverseTargetPrice)
