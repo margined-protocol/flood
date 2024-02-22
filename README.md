@@ -72,7 +72,7 @@ osmsosisd keys add [name-of-your-key] --keyring-backend pass
 
 [1]: https://github.com/margined-protocol/flood/actions/workflows/golangci-lint.yml/badge.svg
 [2]: https://github.com/margined-protocol/flood/actions/workflows/golangci-lint.yml
-[3]: assetstele/flood.webp
+[3]: assets/flood.webp
 [4]: ../../releases
 [5]: https://www.passwordstore.org/
 [6]: configs/config.example.toml
