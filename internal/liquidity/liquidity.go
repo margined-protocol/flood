@@ -1,6 +1,7 @@
 package liquidity
 
 import (
+	"errors"
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
@@ -18,9 +19,9 @@ const TICK_SPACING = int64(100)
 func createPositionMsg(poolId uint64, lowerTick, upperTick int64, tokens sdk.Coins, addr string, isBuy bool) sdk.Msg {
 	var amount0, amount1 sdkmath.Int
 	if isBuy {
-		amount0, amount1 = sdk.ZeroInt(), sdk.NewInt(1)
+		amount0, amount1 = sdk.ZeroInt(), sdk.ZeroInt()
 	} else {
-		amount0, amount1 = sdk.NewInt(1), sdk.ZeroInt()
+		amount0, amount1 = sdk.ZeroInt(), sdk.ZeroInt()
 	}
 
 	// Generate the swap message
@@ -92,6 +93,10 @@ func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targ
 		return nil, err
 	}
 
+	if spotPriceAsBigDec.LT(targetPriceAsBigDec) {
+		targetPriceAsBigDec, spotPriceAsBigDec = spotPriceAsBigDec, targetPriceAsBigDec
+	}
+
 	buyTick, lowTick, sellTick, highTick, err := calculateBuySellTicks(l, targetPriceAsBigDec, spotPriceAsBigDec, spreadAsBigDec)
 	if err != nil {
 		l.Error("Failed to calculate buy and sell ticks", zap.Error(err))
@@ -100,6 +105,12 @@ func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targ
 
 	lowTick, buyTick = adjustForCurrentTick(l, true, currentTick, lowTick, buyTick)
 	sellTick, highTick = adjustForCurrentTick(l, false, currentTick, sellTick, highTick)
+
+	if !(lowTick < buyTick && buyTick < sellTick && sellTick < highTick) {
+		err := errors.New("ticks are in the incorrect order")
+		l.Error("Failed to calculate buy and sell ticks", zap.Error(err))
+		return nil, err
+	}
 
 	buyPosition := createPositionMsg(poolId, lowTick, buyTick, sdk.NewCoins(token1), addr, true)
 	sellPosition := createPositionMsg(poolId, sellTick, highTick, sdk.NewCoins(token0), addr, false)
@@ -124,6 +135,8 @@ func adjustForCurrentTick(l *zap.Logger, isBuy bool, currentTick, lowerTick, upp
 		}
 	}
 
+	fmt.Println("lowerTick", lowerTick)
+
 	upperTick, err := clmath.RoundDownTickToSpacing(upperTick, TICK_SPACING)
 	if err != nil {
 		l.Error("Failed to calculate buy price tick", zap.Error(err))
@@ -132,6 +145,17 @@ func adjustForCurrentTick(l *zap.Logger, isBuy bool, currentTick, lowerTick, upp
 	lowerTick, err = clmath.RoundDownTickToSpacing(lowerTick, TICK_SPACING)
 	if err != nil {
 		l.Error("Failed to calculate buy price tick", zap.Error(err))
+	}
+
+	// Calculate the absolute difference
+	lowerDelta := currentTick - lowerTick
+	if lowerDelta < 0 {
+		lowerDelta = -lowerDelta
+	}
+
+	// Check if lowerDelta is less than TICK_SPACING and adjust lowerTick if necessary
+	if lowerDelta < TICK_SPACING {
+		lowerTick += (3 * TICK_SPACING)
 	}
 
 	return lowerTick, upperTick
