@@ -23,7 +23,7 @@ power_addresses = [
 ]
 
 # RPC Server Address
-rpc_server_address = "https://rpc-testnet.margined.io:443"
+rpc_server_address = "https://osmosis-testnet-rpc.polkachu.com:443"
 websocket_path = "/websocket"
 
 # The signer account
@@ -31,11 +31,12 @@ signer_account = "bot-1"
 
 [key]
 app_name = "osmosis"
-backend  = "pass"
+backend = "pass"
 root_dir = "/home/go"
 
 [power_pool]
 pool_id = 63
-base_asset  = "uosmo"
+base_asset = "uosmo"
 quote_asset = "uion"
 target_price = "0.003569258035311200"
+contract_address = "osmo1zttzenjrnfr8tgrsfyu8kw0eshd8mas7yky43jjtactkhvmtkg2qz769y2"

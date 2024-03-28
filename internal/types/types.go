@@ -1,5 +1,18 @@
 package types
 
+import (
+	"context"
+
+	"go.uber.org/zap"
+
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	"github.com/ignite/cli/ignite/pkg/cosmosclient"
+	clquery "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
+	pmquery "github.com/osmosis-labs/osmosis/v21/x/poolmanager/client/queryproto"
+	"google.golang.org/grpc"
+)
+
 type SigningKey struct {
 	AppName string `toml:"app_name"`
 	Backend string `toml:"backend"`
@@ -72,4 +85,19 @@ type Pool struct {
 	ID         uint64 `json:"id"`
 	BaseDenom  string `json:"base_denom"`
 	QuoteDenom string `json:"quote_denom"`
+}
+
+type BlockchainClients struct {
+	CosmosClient    *cosmosclient.Client
+	WebsocketClient *rpchttp.HTTP
+	WasmClient      wasmtypes.QueryClient
+	GRPCClient      *grpc.ClientConn
+	PMClient        pmquery.QueryClient
+	CLClient        clquery.QueryClient
+	Config          *Config
+}
+
+type LoggerContext struct {
+	Logger  *zap.Logger
+	Context context.Context
 }
