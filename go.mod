@@ -1,11 +1,12 @@
 module github.com/margined-protocol/flood
 
-go 1.21.4
+go 1.22
 
 require (
 	cosmossdk.io/math v1.2.0
 	github.com/BurntSushi/toml v1.3.2
 	github.com/CosmWasm/wasmd v0.45.1-0.20231128163306-4b9b61faeaa3
+	github.com/cometbft/cometbft v0.37.2
 	github.com/cosmos/cosmos-sdk v0.47.5
 	github.com/ignite/cli v0.27.2
 	github.com/osmosis-labs/osmosis/osmomath v0.0.7-0.20231124190325-d75e9ade352e
@@ -60,7 +61,6 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/coinbase/rosetta-sdk-go/types v1.0.0 // indirect
-	github.com/cometbft/cometbft v0.37.2 // indirect
 	github.com/cometbft/cometbft-db v0.8.0 // indirect
 	github.com/confio/ics23/go v0.9.1 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
