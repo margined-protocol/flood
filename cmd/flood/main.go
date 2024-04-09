@@ -69,7 +69,7 @@ func setupCosmosClient(ctx context.Context, cfg *types.Config) (*cosmosclient.Cl
 
 // setup GRPC connection establishes a GRPC connection
 func setupGRPCConnection(address string) (*grpc.ClientConn, error) {
-	return grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	return grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
 
 // initialise performs the setup operations for the script
