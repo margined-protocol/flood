@@ -7,6 +7,9 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/cenkalti/backoff/v4"
+
+	floodbackoff "github.com/margined-protocol/flood/internal/backoff"
 	"github.com/margined-protocol/flood/internal/query"
 
 	authz "github.com/cosmos/cosmos-sdk/x/authz"
@@ -19,9 +22,21 @@ func GetValidGrantersWithRequiredGrants(ctx context.Context, queryClient *query.
 		"/osmosis.concentratedliquidity.v1beta1.MsgWithdrawPosition",
 	}
 
-	res, err := queryClient.Authz.GranteeGrants(ctx, &authz.QueryGranteeGrantsRequest{
+	req := authz.QueryGranteeGrantsRequest{
 		Grantee: address,
-	})
+	}
+	var res *authz.QueryGranteeGrantsResponse
+	var err error
+
+	exponentialBackoff := floodbackoff.NewBackoff(ctx)
+
+	retryableRequest := func() error {
+		res, err = queryClient.Authz.GranteeGrants(ctx, &req)
+		return err
+	}
+
+	err = backoff.Retry(retryableRequest, exponentialBackoff)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch grants: %w", err)
 	}
