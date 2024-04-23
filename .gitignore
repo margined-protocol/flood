@@ -1,6 +1,8 @@
 bin
 main
 configs/*.toml
+test
+
 
 # Mac OS X files
 .DS_Store

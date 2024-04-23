@@ -1,43 +1,111 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
-
-# The lines below are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/need to use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 version: 1
 
-before:
-  hooks:
-    # You may remove this if you don't use go modules.
-    - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
+env:
+  - CGO_ENABLED=1
 
 builds:
-  - env:
-      - CGO_ENABLED=0
+  - id: flood-linux-amd64
+    main: ./cmd/flood
+    binary: flood
+    hooks:
+      pre:
+        - mkdir /tmp/x86_64-linux-gnu
+        - wget https://github.com/CosmWasm/wasmvm/releases/download/v1.5.2/libwasmvm_muslc.x86_64.a -O /tmp/x86_64-linux-gnu/libwasmvm_muslc.a
     goos:
       - linux
-      - windows
-      - darwin
-    main: ./cmd/flood
+    goarch:
+      - amd64
+    env:
+      - CC=x86_64-linux-gnu-gcc
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+    - -X 'main.Version={{.Version}}'
+    - -X 'main.BuildDate={{.Date}}'
+    - -X 'main.commit={{.Commit}}' 
+    - -w -s
+    - -linkmode=external
+    - -extldflags '-Wl,-z,muldefs -static -lm -L/tmp/x86_64-linux-gnu -lwasmvm_muslc'
+    tags:
+      - muslc
+      - osusergo
 
-archives:
-  - format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of `uname`.
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
-    format_overrides:
-      - goos: windows
-        format: zip
+  - id: flood-linux-arm64
+    main: ./cmd/flood
+    binary: flood
+    hooks:
+      pre:
+      - mkdir /tmp/aarch64-linux-gnu
+      - wget https://github.com/CosmWasm/wasmvm/releases/download/v1.5.2/libwasmvm_muslc.aarch64.a -O /tmp/aarch64-linux-gnu/libwasmvm_muslc.a
+    goos:
+      - linux
+    goarch:
+      - arm64
+    env:
+      - CC=aarch64-linux-gnu-gcc
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X 'main.Version={{.Version}}'
+      - -X 'main.BuildDate={{.Date}}'
+      - -X 'main.commit={{.Commit}}' 
+      - -w -s
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs -static -lm -L/tmp/aarch64-linux-gnu -lwasmvm_muslc'
+    tags:
+      - muslc
+      - osusergo
+
+  # - id: flood-darwin-amd64
+  #   main: ./cmd/flood/main.go
+  #   binary: flood
+  #   hooks: 
+  #     pre:
+  #       - wget https://github.com/CosmWasm/wasmvm/releases/download/v1.5.2/libwasmvmstatic_darwin.a -O /tmp/libwasmvmstatic_darwin.a
+  #       - mkdir -p /usr/local/lib
+  #       - mv /tmp/libwasmvmstatic_darwin.a /usr/local/lib/
+
+  #   env:
+  #     - CC=o64-clang
+  #     - CGO_LDFLAGS=-L/usr/local/lib -l:libwasmvmstatic_darwin.a
+  #   goos:
+  #     - darwin
+  #   goarch:
+  #     - amd64
+  #   flags:
+  #     - -mod=readonly
+  #     - -trimpath
+
+  # - id: flood-darwin-arm64
+  #   main: ./cmd/flood/main.go
+  #   binary: flood
+  #   hooks:
+  #     pre:
+  #       - wget https://github.com/CosmWasm/wasmvm/releases/download/v1.5.2/libwasmvmstatic_darwin.a -O /tmp/libwasmvmstatic_darwin.a
+  #       - mkdir -p /usr/local/lib
+  #       - mv /tmp/libwasmvmstatic_darwin.a /usr/local/lib/
+  #   env:
+  #     - CC=oa64-clang
+  #     - CGO_LDFLAGS=-L/usr/local/lib
+  #   goos:
+  #     - darwin
+  #   goarch:
+  #     - arm64
+  #   flags:
+  #     - -mod=readonly
+  #     - -trimpath
+
+universal_binaries:
+  - id: flood-darwin-universal
+    ids:
+      - flood-darwin-amd64
+      - flood-darwin-arm64
+    replace: false
 
 changelog:
   sort: asc
@@ -70,4 +138,4 @@ changelog:
 release:
   name_template: "v{{ .Version }}"
   footer: |
-    **Full Changelog**: https://github.com/margined-protocol/reaper/compare/{{ .PreviousTag }}...{{ if .IsNightly }}nightly{{ else }}{{ .Tag }}{{ end }}
+    **Full Changelog**: https://github.com/margined-protocol/flood/compare/{{ .PreviousTag }}...{{ if .IsNightly }}nightly{{ else }}{{ .Tag }}{{ end }}

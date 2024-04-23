@@ -6,9 +6,7 @@ import (
 	"sync"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-
 	"github.com/cenkalti/backoff/v4"
-
 	floodbackoff "github.com/margined-protocol/flood/internal/backoff"
 	"github.com/margined-protocol/flood/internal/types"
 )

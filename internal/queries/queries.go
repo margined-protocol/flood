@@ -6,14 +6,13 @@ import (
 	"sync"
 
 	"github.com/cenkalti/backoff/v4"
+	floodbackoff "github.com/margined-protocol/flood/internal/backoff"
+	"github.com/margined-protocol/flood/internal/types"
 	"github.com/osmosis-labs/osmosis/v24/tests/e2e/util"
 	cl "github.com/osmosis-labs/osmosis/v24/x/concentrated-liquidity/client/queryproto"
 	cltypes "github.com/osmosis-labs/osmosis/v24/x/concentrated-liquidity/types"
 	poolmanager "github.com/osmosis-labs/osmosis/v24/x/poolmanager/client/queryproto"
 	pmtypes "github.com/osmosis-labs/osmosis/v24/x/poolmanager/types"
-
-	floodbackoff "github.com/margined-protocol/flood/internal/backoff"
-	"github.com/margined-protocol/flood/internal/types"
 )
 
 func GetUserPositions(ctx context.Context, client cl.QueryClient, poolConfig types.Pool, user string) (*cl.UserPositionsResponse, error) {
@@ -38,7 +37,6 @@ func GetUserPositions(ctx context.Context, client cl.QueryClient, poolConfig typ
 	}
 
 	return userPositions, nil
-
 }
 
 func GetSpotPrice(ctx context.Context, client poolmanager.QueryClient, poolConfig types.Pool) (string, error) {
@@ -61,18 +59,15 @@ func GetSpotPrice(ctx context.Context, client poolmanager.QueryClient, poolConfi
 	}
 
 	err = backoff.Retry(retryableRequest, exponentialBackoff)
-
 	if err != nil {
 		return "", err
-	} else {
-		return spotPriceResponse.SpotPrice, nil
 	}
 
+	return spotPriceResponse.SpotPrice, nil
 }
 
-func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolId uint64) (int64, error) {
-
-	poolReq := poolmanager.PoolRequest{PoolId: poolId}
+func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolID uint64) (int64, error) {
+	poolReq := poolmanager.PoolRequest{PoolId: poolID}
 
 	exponentialBackoff := floodbackoff.NewBackoff(ctx)
 
@@ -98,12 +93,10 @@ func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolId 
 	currentTick := pool.(cltypes.ConcentratedPoolExtension).GetCurrentTick()
 
 	return currentTick, nil
-
 }
 
-func GetTotalPoolLiquidity(ctx context.Context, client poolmanager.QueryClient, poolId uint64) (*poolmanager.TotalPoolLiquidityResponse, error) {
-
-	req := poolmanager.TotalPoolLiquidityRequest{PoolId: poolId}
+func GetTotalPoolLiquidity(ctx context.Context, client poolmanager.QueryClient, poolID uint64) (*poolmanager.TotalPoolLiquidityResponse, error) {
+	req := poolmanager.TotalPoolLiquidityRequest{PoolId: poolID}
 
 	exponentialBackoff := floodbackoff.NewBackoff(ctx)
 
@@ -116,13 +109,11 @@ func GetTotalPoolLiquidity(ctx context.Context, client poolmanager.QueryClient, 
 	}
 
 	err = backoff.Retry(retryableRequest, exponentialBackoff)
-
 	if err != nil {
 		return &poolmanager.TotalPoolLiquidityResponse{}, err
-	} else {
-		return totalPoolLiquidityReponse, nil
 	}
 
+	return totalPoolLiquidityReponse, nil
 }
 
 func GetSpotPrices(ctx context.Context, poolManagerClient poolmanager.QueryClient, config types.GetConfigResponse) (string, string, error) {
