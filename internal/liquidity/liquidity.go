@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/osmosis-labs/osmosis/osmomath"
-	clmath "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/math"
-	"github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/model"
-	cltypes "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/types"
+	clmath "github.com/osmosis-labs/osmosis/v24/x/concentrated-liquidity/math"
+	"github.com/osmosis-labs/osmosis/v24/x/concentrated-liquidity/model"
+	cltypes "github.com/osmosis-labs/osmosis/v24/x/concentrated-liquidity/types"
 	"go.uber.org/zap"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

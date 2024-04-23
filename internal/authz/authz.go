@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	floodbackoff "github.com/margined-protocol/flood/internal/backoff"
 	"github.com/margined-protocol/flood/internal/query"
 	"go.uber.org/zap"
@@ -32,7 +33,6 @@ func GetValidGrantersWithRequiredGrants(ctx context.Context, queryClient *query.
 	}
 
 	err = backoff.Retry(retryableRequest, exponentialBackoff)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch grants: %w", err)
 	}

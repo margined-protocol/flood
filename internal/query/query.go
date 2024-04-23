@@ -2,13 +2,12 @@ package query
 
 import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	clquery "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
-	pmquery "github.com/osmosis-labs/osmosis/v21/x/poolmanager/client/queryproto"
+	clquery "github.com/osmosis-labs/osmosis/v24/x/concentrated-liquidity/client/queryproto"
+	pmquery "github.com/osmosis-labs/osmosis/v24/x/poolmanager/client/queryproto"
 	"google.golang.org/grpc"
 
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-
 )
 
 // Client is a wrapper with Cosmos and Osmosis grpc query clients
