@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
-
 	"github.com/margined-protocol/flood/internal/types"
 )
 

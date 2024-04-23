@@ -4,35 +4,32 @@ import (
 	"errors"
 	"fmt"
 
-	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/osmosis-labs/osmosis/osmomath"
 	clmath "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/math"
-	model "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/model"
+	"github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/model"
 	cltypes "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/types"
 	"go.uber.org/zap"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const TICK_SPACING = int64(100)
+const TickSpacing = int64(100)
 
 // createPositionMsg creates a new CL position message
-func createPositionMsg(poolId uint64, lowerTick, upperTick int64, tokens sdk.Coins, addr string, isBuy bool) sdk.Msg {
-	var amount0, amount1 sdkmath.Int
-	if isBuy {
-		amount0, amount1 = sdk.ZeroInt(), sdk.ZeroInt()
-	} else {
-		amount0, amount1 = sdk.ZeroInt(), sdk.ZeroInt()
-	}
-
+// createPositionMsg creates a new CL position message
+func createPositionMsg(poolID uint64, lowerTick, upperTick int64, tokens sdk.Coins, addr string) sdk.Msg {
 	// Generate the swap message
 	msg := cltypes.MsgCreatePosition{
-		PoolId:          poolId,
-		Sender:          addr,
-		LowerTick:       lowerTick,
-		UpperTick:       upperTick,
-		TokensProvided:  tokens,
-		TokenMinAmount0: amount0,
-		TokenMinAmount1: amount1,
+		PoolId:         poolID,
+		Sender:         addr,
+		LowerTick:      lowerTick,
+		UpperTick:      upperTick,
+		TokensProvided: tokens,
+		// Note: we do not place token min amount as currently we only supply
+		// single sided liquidity, ergo we do not to consider and slippage during
+		// creation of the position
+		TokenMinAmount0: sdk.ZeroInt(),
+		TokenMinAmount1: sdk.ZeroInt(),
 	}
 
 	return &msg
@@ -69,7 +66,7 @@ func RemovePreviousPositions(l *zap.Logger, positions []model.FullPositionBreakd
 }
 
 // marketMake creates a market making positions
-func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targetPrice, spread string, token0 sdk.Coin, token1 sdk.Coin, addr string) ([]sdk.Msg, error) {
+func MarketMake(l *zap.Logger, poolID uint64, currentTick int64, spotPrice, targetPrice, spread string, token0 sdk.Coin, token1 sdk.Coin, addr string) ([]sdk.Msg, error) {
 	l.Debug("inputs",
 		zap.String("spotPrice", spotPrice),
 		zap.String("targetPrice", targetPrice),
@@ -112,8 +109,8 @@ func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targ
 		return nil, err
 	}
 
-	buyPosition := createPositionMsg(poolId, lowTick, buyTick, sdk.NewCoins(token1), addr, true)
-	sellPosition := createPositionMsg(poolId, sellTick, highTick, sdk.NewCoins(token0), addr, false)
+	buyPosition := createPositionMsg(poolID, lowTick, buyTick, sdk.NewCoins(token1), addr)
+	sellPosition := createPositionMsg(poolID, sellTick, highTick, sdk.NewCoins(token0), addr)
 
 	fmt.Println("buyPosition", buyPosition)
 	fmt.Println("sellPosition", sellPosition)
@@ -122,27 +119,26 @@ func MarketMake(l *zap.Logger, poolId uint64, currentTick int64, spotPrice, targ
 }
 
 func adjustForCurrentTick(l *zap.Logger, isBuy bool, currentTick, lowerTick, upperTick int64) (int64, int64) {
-
 	fmt.Println("lowerTick", lowerTick)
 
 	if lowerTick <= currentTick && currentTick <= upperTick {
 		fmt.Println("The value is within the range.")
 
 		if isBuy {
-			upperTick = currentTick - TICK_SPACING
+			upperTick = currentTick - TickSpacing
 		} else {
-			lowerTick = currentTick + TICK_SPACING
+			lowerTick = currentTick + TickSpacing
 		}
 	}
 
 	fmt.Println("lowerTick", lowerTick)
 
-	upperTick, err := clmath.RoundDownTickToSpacing(upperTick, TICK_SPACING)
+	upperTick, err := clmath.RoundDownTickToSpacing(upperTick, TickSpacing)
 	if err != nil {
 		l.Error("Failed to calculate buy price tick", zap.Error(err))
 	}
 
-	lowerTick, err = clmath.RoundDownTickToSpacing(lowerTick, TICK_SPACING)
+	lowerTick, err = clmath.RoundDownTickToSpacing(lowerTick, TickSpacing)
 	if err != nil {
 		l.Error("Failed to calculate buy price tick", zap.Error(err))
 	}
@@ -154,14 +150,16 @@ func adjustForCurrentTick(l *zap.Logger, isBuy bool, currentTick, lowerTick, upp
 	}
 
 	// Check if lowerDelta is less than TICK_SPACING and adjust lowerTick if necessary
-	if lowerDelta < TICK_SPACING {
-		lowerTick += (3 * TICK_SPACING)
+	if lowerDelta < TickSpacing {
+		lowerTick += (3 * TickSpacing)
 	}
 
 	return lowerTick, upperTick
 }
 
+// calculateBuySellTicks calculates the buy and sell ticks based on the spread
 func calculateBuySellTicks(l *zap.Logger, buyPrice, sellPrice, spread osmomath.BigDec) (int64, int64, int64, int64, error) {
+	fmt.Println(buyPrice, sellPrice, spread)
 	// get the lower and upper bounds
 	buyLowerBound := buyPrice.Mul(osmomath.OneBigDec().Sub(spread))
 	sellUpperBound := sellPrice.Mul(osmomath.OneBigDec().Add(spread))
@@ -170,25 +168,38 @@ func calculateBuySellTicks(l *zap.Logger, buyPrice, sellPrice, spread osmomath.B
 	buyPriceTick, err := calculateAndRoundPriceToTick(buyPrice)
 	if err != nil {
 		l.Error("Failed to calculate buy price tick", zap.Error(err))
+		return 0, 0, 0, 0, err
 	}
 
 	buyLowerTick, err := calculateAndRoundPriceToTick(buyLowerBound)
 	if err != nil {
 		l.Error("Failed to calculate buy lower bound price tick", zap.Error(err))
+		return 0, 0, 0, 0, err
 	}
 
 	sellPriceTick, err := calculateAndRoundPriceToTick(sellPrice)
 	if err != nil {
 		l.Error("Failed to calculate sell price tick", zap.Error(err))
+		return 0, 0, 0, 0, err
 	}
 
 	sellUpperTick, err := calculateAndRoundPriceToTick(sellUpperBound)
 	if err != nil {
 		l.Error("Failed to calculate sell upper bound price tick", zap.Error(err))
+		return 0, 0, 0, 0, err
 	}
 
-	return buyPriceTick, buyLowerTick, sellPriceTick, sellUpperTick, nil
+	l.Info("Market Bounds for transaction",
+		zap.String("buy_lower_bound_price", buyLowerBound.String()),
+		zap.Float64("buy_lower_bound_tick", float64(buyLowerTick)),
+		zap.String("buy_upper_bound_price", buyPrice.String()),
+		zap.Float64("buy_upper_bound_tick", float64(buyPriceTick)),
+		zap.String("sell_lower_bound_price", sellPrice.String()),
+		zap.Float64("sell_lower_bound_tick", float64(sellPriceTick)),
+		zap.String("sell_upper_bound_price", sellUpperBound.String()),
+		zap.Float64("sell_upper_bound_tick", float64(sellUpperTick)))
 
+	return buyPriceTick, buyLowerTick, sellPriceTick, sellUpperTick, nil
 }
 
 func calculateAndRoundPriceToTick(price osmomath.BigDec) (int64, error) {
@@ -197,7 +208,7 @@ func calculateAndRoundPriceToTick(price osmomath.BigDec) (int64, error) {
 		return 0, err
 	}
 
-	priceTick, err = clmath.RoundDownTickToSpacing(priceTick, TICK_SPACING)
+	priceTick, err = clmath.RoundDownTickToSpacing(priceTick, TickSpacing)
 	if err != nil {
 		return 0, err
 	}

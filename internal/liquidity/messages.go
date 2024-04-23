@@ -1,11 +1,11 @@
 package liquidity
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/margined-protocol/flood/internal/types"
 	clquery "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
 	"go.uber.org/zap"
 
-	"github.com/margined-protocol/flood/internal/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cfg *types.Config, currentTick int64, address, powerPrice, targetPrice string) ([]sdk.Msg, error) {
@@ -68,12 +68,11 @@ func CreateUpdatePositionMsgs(l *zap.Logger, p clquery.UserPositionsResponse, cf
 		)
 	}
 
-	positionMsgs, err := MarketMake(l, cfg.PowerPool.PoolId, currentTick, powerPrice, targetPrice, cfg.Position.Spread, token0, token1, address)
+	positionMsgs, err := MarketMake(l, cfg.PowerPool.PoolID, currentTick, powerPrice, targetPrice, cfg.Position.Spread, token0, token1, address)
 	if err != nil {
 		l.Fatal("Failed to market make", zap.Error(err))
 		return nil, err
 	}
 
 	return append(msgs, positionMsgs...), nil
-
 }

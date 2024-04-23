@@ -5,16 +5,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/margined-protocol/flood/internal/query"
 	"go.uber.org/zap"
 
-	"github.com/margined-protocol/flood/internal/query"
-
-	authz "github.com/cosmos/cosmos-sdk/x/authz"
+	"github.com/cosmos/cosmos-sdk/x/authz"
 )
 
-func GetValidGrantersWithRequiredGrants(ctx context.Context, queryClient *query.QueryClient, address string, l *zap.Logger) ([]string, error) {
-
-	var requiredGrants = []string{
+func GetValidGrantersWithRequiredGrants(ctx context.Context, queryClient *query.Client, address string, l *zap.Logger) ([]string, error) {
+	requiredGrants := []string{
 		"/osmosis.concentratedliquidity.v1beta1.MsgCreatePosition",
 		"/osmosis.concentratedliquidity.v1beta1.MsgWithdrawPosition",
 	}

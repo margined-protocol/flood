@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-
 	"github.com/margined-protocol/flood/internal/types"
 )
 

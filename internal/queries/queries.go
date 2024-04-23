@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/margined-protocol/flood/internal/types"
 	"github.com/osmosis-labs/osmosis/v21/tests/e2e/util"
 	cl "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/client/queryproto"
 	cltypes "github.com/osmosis-labs/osmosis/v21/x/concentrated-liquidity/types"
 	poolmanager "github.com/osmosis-labs/osmosis/v21/x/poolmanager/client/queryproto"
 	pmtypes "github.com/osmosis-labs/osmosis/v21/x/poolmanager/types"
-
-	"github.com/margined-protocol/flood/internal/types"
 )
 
 func GetUserPositions(ctx context.Context, client cl.QueryClient, poolConfig types.Pool, user string) (*cl.UserPositionsResponse, error) {
@@ -46,9 +45,8 @@ func GetSpotPrice(ctx context.Context, client poolmanager.QueryClient, poolConfi
 	return spotPrice.SpotPrice, nil
 }
 
-func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolId uint64) (int64, error) {
-
-	poolReq := poolmanager.PoolRequest{PoolId: poolId}
+func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolID uint64) (int64, error) {
+	poolReq := poolmanager.PoolRequest{PoolId: poolID}
 	res, err := client.Pool(ctx, &poolReq)
 	if err != nil {
 		return 0, err
@@ -63,12 +61,10 @@ func GetCurrentTick(ctx context.Context, client poolmanager.QueryClient, poolId 
 	currentTick := pool.(cltypes.ConcentratedPoolExtension).GetCurrentTick()
 
 	return currentTick, nil
-
 }
 
-func GetTotalPoolLiquidity(ctx context.Context, client poolmanager.QueryClient, poolId uint64) (*poolmanager.TotalPoolLiquidityResponse, error) {
-
-	return client.TotalPoolLiquidity(ctx, &poolmanager.TotalPoolLiquidityRequest{PoolId: poolId})
+func GetTotalPoolLiquidity(ctx context.Context, client poolmanager.QueryClient, poolID uint64) (*poolmanager.TotalPoolLiquidityResponse, error) {
+	return client.TotalPoolLiquidity(ctx, &poolmanager.TotalPoolLiquidityRequest{PoolId: poolID})
 }
 
 func GetSpotPrices(ctx context.Context, poolManagerClient poolmanager.QueryClient, config types.GetConfigResponse) (string, string, error) {
