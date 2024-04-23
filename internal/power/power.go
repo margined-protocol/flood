@@ -6,6 +6,10 @@ import (
 	"sync"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
+	"github.com/cenkalti/backoff/v4"
+
+	floodbackoff "github.com/margined-protocol/flood/internal/backoff"
 	"github.com/margined-protocol/flood/internal/types"
 )
 
@@ -16,8 +20,17 @@ func querySmartContract(ctx context.Context, pa string, c wasmtypes.QueryClient,
 		QueryData: []byte(query),
 	}
 
-	res, err := c.SmartContractState(ctx, req)
-	if err != nil {
+	var res *wasmtypes.QuerySmartContractStateResponse
+	var err error
+
+	exponentialBackoff := floodbackoff.NewBackoff(ctx)
+
+	retryableRequest := func() error {
+		res, err = c.SmartContractState(ctx, req)
+		return err
+	}
+
+	if err := backoff.Retry(retryableRequest, exponentialBackoff); err != nil {
 		return err
 	}
 

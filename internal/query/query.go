@@ -8,6 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 )
 
 // Client is a wrapper with Cosmos and Osmosis grpc query clients
