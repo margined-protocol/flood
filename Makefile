@@ -109,8 +109,8 @@ lint: | $(GOLANGCI-LINT) ; $(info $(M) running golint…) @ ## Run golint#
 	$Q $(GOLANGCI-LINT) run
 
 .PHONY: fmt
-fmt: | $(GOIMPORTS) ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files
-	$Q $(GOIMPORTS) -local $(MODULE) -w $(shell $(GO) list -f '{{$$d := .Dir}}{{range $$f := .GoFiles}}{{printf "%s/%s\n" $$d $$f}}{{end}}{{range $$f := .CgoFiles}}{{printf "%s/%s\n" $$d $$f}}{{end}}{{range $$f := .TestGoFiles}}{{printf "%s/%s\n" $$d $$f}}{{end}}' $(PKGS))
+fmt: ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files
+	$Q find . -name '*.go' -exec gofmt -s -w {} +
 
 # Misc
 
