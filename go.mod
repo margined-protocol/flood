@@ -10,7 +10,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.47.8
 	github.com/ignite/cli v0.27.2
 	github.com/osmosis-labs/osmosis/osmomath v0.0.11
-	github.com/osmosis-labs/osmosis/v24 v24.0.1
+	github.com/osmosis-labs/osmosis/v24 v24.0.4
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.63.2
 	gotest.tools v2.2.0+incompatible
@@ -33,7 +33,7 @@ require (
 	cloud.google.com/go/compute v1.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.6 // indirect
-	cloud.google.com/go/storage v1.36.0 // indirect
+	cloud.google.com/go/storage v1.37.0 // indirect
 	cosmossdk.io/api v0.3.1 // indirect
 	cosmossdk.io/core v0.5.1 // indirect
 	cosmossdk.io/depinject v1.0.0-alpha.4 // indirect
@@ -75,7 +75,7 @@ require (
 	github.com/cosmos/iavl v1.1.2-0.20240405173644-e52f7630d3b7 // indirect
 	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7 v7.1.3 // indirect
 	github.com/cosmos/ibc-apps/modules/async-icq/v7 v7.1.1 // indirect
-	github.com/cosmos/ibc-go/modules/light-clients/08-wasm v0.1.1-0.20231213092633-b306e7a706e1 // indirect
+	github.com/cosmos/ibc-go/modules/light-clients/08-wasm v0.1.1-ibc-go-v7.3-wasmvm-v1.5 // indirect
 	github.com/cosmos/ibc-go/v7 v7.4.0 // indirect
 	github.com/cosmos/ics23/go v0.10.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.12.4 // indirect
@@ -153,9 +153,9 @@ require (
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20220708102147-0a8a51822cae // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/osmosis-labs/osmosis/osmoutils v0.0.11-0.20240409164616-caf6b6543d4b // indirect
-	github.com/osmosis-labs/osmosis/x/epochs v0.0.7-0.20240409164616-caf6b6543d4b // indirect
-	github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.13-0.20240409164616-caf6b6543d4b // indirect
+	github.com/osmosis-labs/osmosis/osmoutils v0.0.11-0.20240417064914-57cce9c39b17 // indirect
+	github.com/osmosis-labs/osmosis/x/epochs v0.0.7-0.20240417064914-57cce9c39b17 // indirect
+	github.com/osmosis-labs/osmosis/x/ibc-hooks v0.0.13-0.20240417064914-57cce9c39b17 // indirect
 	github.com/osmosis-labs/sqs/sqsdomain v0.0.0-20240404053421-41aab009fb04 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/petermattis/goid v0.0.0-20230317030725-371a4b8eda08 // indirect
@@ -195,14 +195,14 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.17.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/api v0.162.0 // indirect
