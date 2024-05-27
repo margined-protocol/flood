@@ -3,7 +3,7 @@ module github.com/margined-protocol/flood
 go 1.22.2
 
 require (
-	github.com/BurntSushi/toml v1.3.2
+	github.com/BurntSushi/toml v1.4.0
 	github.com/CosmWasm/wasmd v0.45.1-0.20231128163306-4b9b61faeaa3
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cometbft/cometbft v0.38.0
